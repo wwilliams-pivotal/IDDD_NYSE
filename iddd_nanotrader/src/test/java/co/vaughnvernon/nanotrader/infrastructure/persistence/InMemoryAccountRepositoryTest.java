@@ -20,12 +20,12 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import co.vaughnvernon.nanotrader.domain.model.account.Account;
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.nanotrader.domain.model.account.AccountRepository;
 import co.vaughnvernon.nanotrader.domain.model.account.Holding;
 import co.vaughnvernon.nanotrader.domain.model.account.Profile;
-import co.vaughnvernon.nanotrader.domain.model.order.OrderId;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
+import co.vaughnvernon.tradercommon.order.OrderId;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 
 public class InMemoryAccountRepositoryTest extends TestCase {
@@ -101,7 +101,7 @@ public class InMemoryAccountRepositoryTest extends TestCase {
 
 		Holding holding = new Holding(
 				account.accountId(),
-				OrderId.unique(),
+				OrderId.unique("GOOG"),
 				new TickerSymbol("GOOG"),
 				2,
 				new Money("1490.25"),

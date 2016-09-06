@@ -17,13 +17,9 @@ package co.vaughnvernon.algotrader.domain.model.vwap;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import co.vaughnvernon.algotrader.domain.model.order.AlgoOrder;
 import co.vaughnvernon.algotrader.domain.model.order.AlgoOrderRepository;
-import co.vaughnvernon.algotrader.domain.model.order.AlgoSliceOrderSharesRequested;
-import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
-import co.vaughnvernon.tradercommon.event.DomainEventSubscriber;
 import co.vaughnvernon.tradercommon.pricevolume.PriceVolume;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 import co.vaughnvernon.tradercommon.quotebar.QuoteBar;
@@ -33,8 +29,7 @@ public class VWAPTradingService {
 	private AlgoOrderRepository algoOrderRepository;
 	private VWAPAnalyticRepository vwapAnalyticRepository;
 
-	public VWAPTradingService(
-			VWAPAnalyticRepository aVWAPAnalyticRepository,
+	public VWAPTradingService(VWAPAnalyticRepository aVWAPAnalyticRepository,
 			AlgoOrderRepository anAlgoOrderRepository) {
 
 		super();
@@ -44,8 +39,7 @@ public class VWAPTradingService {
 	}
 
 	public void tradeUnfilledBuyOrdersUsing(QuoteBar aQuoteBar) {
-		VWAPAnalytic vwapAnalytic =
-				this.findAndAccumulateVWAPAnalyticUsing(aQuoteBar);
+		VWAPAnalytic vwapAnalytic = this.findAndAccumulateVWAPAnalyticUsing(aQuoteBar);
 
 		if (vwapAnalytic.isReadyToTrade()) {
 			this.tradeUnfilledBuyOrdersUsing(aQuoteBar, vwapAnalytic);
@@ -56,17 +50,13 @@ public class VWAPTradingService {
 		return this.algoOrderRepository;
 	}
 
-	private void attemptTradeFor(
-			AlgoOrder anAlgoOrder,
-			VWAPAnalytic aVWAPAnalytic,
-			AlgoSliceOrderSharesRequestedSubscriber aSubscriber) {
+	private BigDecimal attemptTradeFor(AlgoOrder anAlgoOrder, VWAPAnalytic aVWAPAnalytic) {
 
+		BigDecimal sharesRequested = new BigDecimal(0);
 		boolean done = false;
 		for (int tries = 0; !done && tries < 3; ++tries) {
 			try {
-				aSubscriber.clear();
-
-				anAlgoOrder.requestSlice(aVWAPAnalytic.vwap(), 100);
+				sharesRequested = anAlgoOrder.requestSlice(aVWAPAnalytic.vwap(), 100);
 
 				this.algoOrderRepository().save(anAlgoOrder);
 
@@ -76,25 +66,17 @@ public class VWAPTradingService {
 				anAlgoOrder = this.algoOrderRepository().algoOrderOfId(anAlgoOrder.orderId());
 			}
 		}
+		return sharesRequested;
 	}
 
 	private VWAPAnalytic findAndAccumulateVWAPAnalyticUsing(QuoteBar aQuoteBar) {
-		VWAPAnalytic vwapAnalytic =
-				this.vwapAnalyticRepository()
-					.vwapAnalyticOfSymbol(aQuoteBar.symbol());
+		VWAPAnalytic vwapAnalytic = this.vwapAnalyticRepository().vwapAnalyticOfSymbol(aQuoteBar.symbol());
 
 		if (vwapAnalytic != null) {
-			vwapAnalytic.accumulatePriceVolume(
-					new PriceVolume(
-							aQuoteBar.priceVolume(),
-							aQuoteBar.volume()));
+			vwapAnalytic.accumulatePriceVolume(new PriceVolume(aQuoteBar.priceVolume(), aQuoteBar.volume()));
 		} else {
-			vwapAnalytic =
-					new VWAPAnalytic(
-							aQuoteBar.symbol(),
-							new PriceVolume(
-									aQuoteBar.priceVolume(),
-									aQuoteBar.volume()));
+			vwapAnalytic = new VWAPAnalytic(aQuoteBar.symbol(),
+					new PriceVolume(aQuoteBar.priceVolume(), aQuoteBar.volume()));
 		}
 
 		this.vwapAnalyticRepository().save(vwapAnalytic);
@@ -103,15 +85,12 @@ public class VWAPTradingService {
 	}
 
 	private void tradeUnfilledBuyOrdersUsing(QuoteBar aQuoteBar, VWAPAnalytic aVWAPAnalytic) {
-		Collection<AlgoOrder> algoOrders =
-				this.algoOrderRepository()
-					.unfilledBuyAlgoOrdersOfSymbol(
-							new TickerSymbol(aQuoteBar.symbol()));
+		Collection<AlgoOrder> algoOrders = this.algoOrderRepository()
+				.unfilledBuyAlgoOrdersOfSymbol(new TickerSymbol(aQuoteBar.symbol()));
 
-		AlgoSliceOrderSharesRequestedSubscriber subscriber =
-				new AlgoSliceOrderSharesRequestedSubscriber();
+//		AlgoSliceOrderSharesRequestedSubscriber subscriber = new AlgoSliceOrderSharesRequestedSubscriber();
 
-		DomainEventPublisher.instance().subscribe(subscriber);
+//		DomainEventPublisher.instance().subscribe(subscriber);
 
 		BigDecimal totalQuantityAvailable = aQuoteBar.totalQuantity();
 
@@ -121,46 +100,15 @@ public class VWAPTradingService {
 			AlgoOrder algoOrder = iterator.next();
 
 			if (aVWAPAnalytic.qualifiesAsTradePrice(algoOrder.quote().price())) {
-				this.attemptTradeFor(algoOrder, aVWAPAnalytic, subscriber);
+				BigDecimal sharesRequested = this.attemptTradeFor(algoOrder, aVWAPAnalytic);
 
-				totalQuantityAvailable =
-						totalQuantityAvailable
-							.subtract(new BigDecimal(subscriber.orderSharesRequested()));
+				totalQuantityAvailable = totalQuantityAvailable.subtract(sharesRequested);
+				// .subtract(new BigDecimal(subscriber.orderSharesRequested()));
 			}
 		}
 	}
 
 	private VWAPAnalyticRepository vwapAnalyticRepository() {
 		return this.vwapAnalyticRepository;
-	}
-
-	private class AlgoSliceOrderSharesRequestedSubscriber
-			implements DomainEventSubscriber<AlgoSliceOrderSharesRequested> {
-
-		private AtomicInteger orderSharesRequested;
-
-		AlgoSliceOrderSharesRequestedSubscriber() {
-			super();
-
-			this.orderSharesRequested = new AtomicInteger(0);
-		}
-
-		@Override
-		public void handleEvent(AlgoSliceOrderSharesRequested aDomainEvent) {
-			this.orderSharesRequested.set(aDomainEvent.quantity().intValue());
-		}
-
-		@Override
-		public Class<AlgoSliceOrderSharesRequested> subscribedToEventType() {
-			return AlgoSliceOrderSharesRequested.class;
-		}
-
-		protected void clear() {
-			this.orderSharesRequested.set(0);
-		}
-
-		protected int orderSharesRequested() {
-			return this.orderSharesRequested.get();
-		}
 	}
 }

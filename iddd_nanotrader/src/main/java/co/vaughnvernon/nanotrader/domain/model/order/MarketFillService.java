@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
 import co.vaughnvernon.tradercommon.event.DomainEventSubscriber;
 
-public class MarketFillService {
+public class MarketFillService implements FillService{
 
 	private BuyOrderRepository buyOrderRepository;
 
@@ -31,7 +31,7 @@ public class MarketFillService {
 		this.buyOrderRepository = aBuyOrderRepository;
 	}
 
-	public void fillMarketBuyOrders(
+	public void fillBuyOrders(
 			Collection<BuyOrder> anOpenBuyOrders,
 			int aTotalQuantityAvailable) {
 

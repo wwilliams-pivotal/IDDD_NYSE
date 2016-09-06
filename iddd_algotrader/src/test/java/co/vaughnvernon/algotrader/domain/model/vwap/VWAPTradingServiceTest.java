@@ -20,7 +20,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import junit.framework.TestCase;
+import com.gemstone.gemfire.cache.Operation;
+import com.gemstone.gemfire.cache.query.CqEvent;
+
 import co.vaughnvernon.algotrader.domain.model.order.AlgoOrder;
 import co.vaughnvernon.algotrader.domain.model.order.AlgoOrderFilled;
 import co.vaughnvernon.algotrader.domain.model.order.AlgoOrderRepository;
@@ -28,20 +30,23 @@ import co.vaughnvernon.algotrader.domain.model.order.AlgoSliceOrderSharesRequest
 import co.vaughnvernon.algotrader.domain.model.order.OrderType;
 import co.vaughnvernon.algotrader.infrastructure.persistence.InMemoryAlgoOrderRepository;
 import co.vaughnvernon.algotrader.infrastructure.persistence.InMemoryVWAPAnalyticRepository;
-import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
-import co.vaughnvernon.tradercommon.event.DomainEventSubscriber;
+import co.vaughnvernon.tradercommon.event.DomainEvent;
+import co.vaughnvernon.tradercommon.event.DomainEventGemFirePublisher;
+import co.vaughnvernon.tradercommon.event.DomainEventListener;
+import co.vaughnvernon.tradercommon.event.StoredEvent;
 import co.vaughnvernon.tradercommon.monetary.Money;
 import co.vaughnvernon.tradercommon.pricevolume.PriceVolume;
 import co.vaughnvernon.tradercommon.quote.Quote;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 import co.vaughnvernon.tradercommon.quotebar.QuoteBar;
+import junit.framework.TestCase;
 
 public class VWAPTradingServiceTest extends TestCase {
 
 	private boolean algoOrderFilled;
 	private AlgoOrder algoOrder;
 	private AlgoOrderRepository algoOrderRepository;
-	private int algoSliceCount;
+	private int algoSharesSent;
 	private VWAPAnalyticRepository vwapAnalyticRepository;
 	private VWAPTradingService vwapTradingService;
 
@@ -50,40 +55,65 @@ public class VWAPTradingServiceTest extends TestCase {
 	}
 
 	public void testFillAlgoOrdersUsing() throws Exception {
-		DomainEventPublisher.instance().subscribe(new DomainEventSubscriber<AlgoOrderFilled>() {
+		DomainEventListener aListener1 = new DomainEventListener("algoSliceOrderSharesRequestedCQ") {
 			@Override
-			public void handleEvent(AlgoOrderFilled aDomainEvent) {
-				algoOrderFilled = true;
-			}
-			@Override
-			public Class<AlgoOrderFilled> subscribedToEventType() {
-				return AlgoOrderFilled.class;
-			}
-		});
+			public void onEvent(CqEvent cqEvent) {
+				Operation baseOperation = cqEvent.getBaseOperation();
 
-		DomainEventPublisher.instance().subscribe(new DomainEventSubscriber<AlgoSliceOrderSharesRequested>() {
-			@Override
-			public void handleEvent(AlgoSliceOrderSharesRequested aDomainEvent) {
-				++algoSliceCount;
+				if (baseOperation.isCreate()) {
+					StoredEvent storedEvent = (StoredEvent) cqEvent.getNewValue();
+					DomainEvent aDomainEvent = storedEvent.toDomainEvent();
+					if (aDomainEvent instanceof AlgoSliceOrderSharesRequested) {
+						AlgoSliceOrderSharesRequested event = (AlgoSliceOrderSharesRequested) aDomainEvent;
+						algoSharesSent += event.quantity().intValue();
+						System.out.println("Received " + event.quantity().intValue() + " shares");
+					}
+				}
 			}
+		};
+
+		DomainEventListener aListener2 = new DomainEventListener("algoOrderFilledCQ") {
 			@Override
-			public Class<AlgoSliceOrderSharesRequested> subscribedToEventType() {
-				return AlgoSliceOrderSharesRequested.class;
+			public void onEvent(CqEvent cqEvent) {
+				Operation baseOperation = cqEvent.getBaseOperation();
+
+				if (baseOperation.isCreate()) {
+					StoredEvent storedEvent = (StoredEvent) cqEvent.getNewValue();
+					DomainEvent aDomainEvent = storedEvent.toDomainEvent();
+					if (aDomainEvent instanceof AlgoOrderFilled) {
+						algoOrderFilled = true;
+					}
+				}
 			}
-		});
+		};
+
+		DomainEventGemFirePublisher.instance().subscribe(new DomainEventListener[] {aListener1, aListener2});
 
 		QuoteBar quoteBar = this.quoteBarValue();
 
-		int totalQuantity = this.algoOrder.quote().quantity();
+		int totalQuantity = 0;
+		if (algoOrder != null)
+			totalQuantity = this.algoOrder.quote().quantity();
 
 		for (int count = 0; count < totalQuantity; count += 100) {
 			this.vwapTradingService.tradeUnfilledBuyOrdersUsing(quoteBar);
 		}
+		for (int count = 0; count < totalQuantity; count += 100) {
+			this.vwapTradingService.tradeUnfilledBuyOrdersUsing(quoteBar);
+		}		
+
+		for (int i = 0; i < 5; i++) {
+			Thread.sleep(500);
+			if (algoOrderFilled) {
+				break;
+			}
+		}
+		DomainEventGemFirePublisher.instance().unsubscribe();
 
 		assertTrue(algoOrderFilled);
 		assertFalse(this.algoOrder.hasSharesRemaining());
 		assertNotNull(this.algoOrder.fill());
-		assertEquals(totalQuantity, algoSliceCount * 100);
+		assertEquals(totalQuantity, algoSharesSent);
 	}
 
 	@Override
@@ -100,19 +130,23 @@ public class VWAPTradingServiceTest extends TestCase {
 
 		this.vwapAnalyticRepository.save(vwapAnalytic);
 
-		this.algoOrder =
-				new AlgoOrder(
-						UUID.randomUUID().toString(),
-						OrderType.Buy,
-						new Quote(new TickerSymbol("ORCL"), new Money("32.50"), 700));
-
-		assertTrue(this.algoOrder.hasSharesRemaining());
-
-		this.algoOrderRepository.save(this.algoOrder);
+		this.saveAlgoOrder(algoOrderRepository);
 
 		super.setUp();
 	}
 
+	private void saveAlgoOrder(AlgoOrderRepository algoOrderRepository) {
+		this.algoOrder =
+				new AlgoOrder(
+						UUID.randomUUID().toString(),
+						OrderType.Buy,
+						new Quote(new TickerSymbol("ORCL"), new Money("32.50"), 701));
+
+		assertTrue(this.algoOrder.hasSharesRemaining());
+
+		this.algoOrderRepository.save(this.algoOrder);
+	}
+	
 	private Collection<PriceVolume> priceVolumeValues(
 			Money aBasePrice,
 			BigDecimal aBaseVolume) {
@@ -155,7 +189,7 @@ public class VWAPTradingServiceTest extends TestCase {
 						new Money("31.85"),
 						new BigDecimal("20"),
 						priceVolumes,
-						new BigDecimal("1000"),
+						new BigDecimal("400"),
 						priceVolumes.size());
 
 		return quoteBar;

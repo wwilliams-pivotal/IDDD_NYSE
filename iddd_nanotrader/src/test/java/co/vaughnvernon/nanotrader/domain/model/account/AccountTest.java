@@ -19,10 +19,10 @@ import java.util.Calendar;
 import junit.framework.TestCase;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrder;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrderFilled;
-import co.vaughnvernon.nanotrader.domain.model.order.BuyOrderPlaced;
 import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
 import co.vaughnvernon.tradercommon.event.DomainEventSubscriber;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.BuyOrderPlaced;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 
 public class AccountTest extends TestCase {
@@ -83,7 +83,8 @@ public class AccountTest extends TestCase {
 		DomainEventPublisher.instance().subscribe(new DomainEventSubscriber<BuyOrderPlaced>() {
 			@Override
 			public void handleEvent(BuyOrderPlaced aDomainEvent) {
-				reconcilableAccount.reconcileWith(
+				System.out.println("I am here 1");
+								reconcilableAccount.reconcileWith(
 						new Payment(
 								aDomainEvent.accountId(),
 								aDomainEvent.orderId(),

@@ -18,6 +18,13 @@ import java.util.Date;
 
 public final class PurchaseExecution extends OrderExecution {
 
+	/*
+	 * Serialization constructor
+	 */
+		public PurchaseExecution() {
+			super();
+		}
+
 	public PurchaseExecution(int aQuantityOfSharesOrdered) {
 		super(new Date(), aQuantityOfSharesOrdered, aQuantityOfSharesOrdered);
 	}
@@ -31,7 +38,7 @@ public final class PurchaseExecution extends OrderExecution {
 
 		return new PurchaseExecution(this.openDate(), this.quantityOfSharesOrdered(), quantityOfSharesOutstanding);
 	}
-
+	
 	@Override
 	public String toString() {
 		return "PurchaseExecution [openDate=" + this.openDate()

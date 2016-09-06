@@ -15,8 +15,9 @@
 package co.vaughnvernon.nanotrader.domain.model.account;
 
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrder;
-import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
+import co.vaughnvernon.tradercommon.event.DomainEventGemFirePublisher;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
 import co.vaughnvernon.tradercommon.quote.Quote;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 import junit.framework.TestCase;
@@ -55,7 +56,7 @@ public class HoldingTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		DomainEventPublisher.instance().reset();
+		DomainEventGemFirePublisher.instance().reset();
 	}
 
 	private BuyOrder buyOrderFixture() {

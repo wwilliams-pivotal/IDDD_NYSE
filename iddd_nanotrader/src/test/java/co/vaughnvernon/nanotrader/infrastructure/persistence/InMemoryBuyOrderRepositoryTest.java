@@ -19,11 +19,11 @@ import java.util.Collection;
 import java.util.List;
 
 import junit.framework.TestCase;
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrder;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrderRepository;
-import co.vaughnvernon.nanotrader.domain.model.order.OrderId;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
+import co.vaughnvernon.tradercommon.order.OrderId;
 import co.vaughnvernon.tradercommon.quote.Quote;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 

@@ -14,14 +14,11 @@
 
 package co.vaughnvernon.tradercommon.event;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public class StoredEvent implements Serializable {
+public class StoredEvent {
 
-    private static final long serialVersionUID = 1L;
-
-    private DomainEvent event;
+	private DomainEvent event;
     private long eventId;
 
     public StoredEvent(DomainEvent aDomainEvent) {
@@ -30,7 +27,12 @@ public class StoredEvent implements Serializable {
         this.setEvent(aDomainEvent);
     }
 
-    public long eventId() {
+    // constructor for serialization only
+    public StoredEvent() {
+		super();
+	}
+
+	public long eventId() {
         return this.eventId;
     }
 

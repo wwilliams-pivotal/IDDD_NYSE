@@ -44,7 +44,12 @@ public final class Quote implements Serializable {
 	public Quote(Quote aQuote) {
 		this(aQuote.tickerSymbol(), aQuote.price());
 	}
-
+	
+	// serialization constructor
+	public Quote() {
+		super();
+	}
+	
 	public boolean hasTickerSymbol(TickerSymbol aTickerSymbol) {
 		return this.tickerSymbol().equals(aTickerSymbol);
 	}

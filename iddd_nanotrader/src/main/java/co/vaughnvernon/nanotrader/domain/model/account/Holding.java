@@ -16,8 +16,9 @@ package co.vaughnvernon.nanotrader.domain.model.account;
 
 import java.util.Date;
 
-import co.vaughnvernon.nanotrader.domain.model.order.OrderId;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
+import co.vaughnvernon.tradercommon.order.OrderId;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 
 public class Holding {
@@ -54,6 +55,11 @@ public class Holding {
 				aHolding.numberOfShares(),
 				aHolding.totalValue(),
 				aHolding.acquiredOn());
+	}
+
+	//serialization constructor
+	public Holding() {
+		super();
 	}
 
 	public AccountId accountId() {

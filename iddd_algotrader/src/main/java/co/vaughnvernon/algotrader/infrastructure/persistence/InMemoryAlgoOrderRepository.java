@@ -31,7 +31,7 @@ public class InMemoryAlgoOrderRepository implements AlgoOrderRepository {
 	private Map<String,AlgoOrder> algoOrders;
 
 	public static void clear() {
-		((InMemoryAlgoOrderRepository) instance).algoOrders.clear();
+		((InMemoryAlgoOrderRepository) instance()).algoOrders.clear();
 	}
 
 	public static synchronized AlgoOrderRepository instance() {

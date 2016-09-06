@@ -19,18 +19,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import junit.framework.TestCase;
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrder;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrderRepository;
 import co.vaughnvernon.nanotrader.domain.model.order.MarketFillService;
-import co.vaughnvernon.nanotrader.infrastructure.persistence.InMemoryBuyOrderRepository;
+import co.vaughnvernon.nanotrader.infrastructure.persistence.GemFireBuyOrderRepository;
 import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
 import co.vaughnvernon.tradercommon.pricevolume.PriceVolume;
 import co.vaughnvernon.tradercommon.quote.Quote;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 import co.vaughnvernon.tradercommon.quotebar.QuoteBar;
+import junit.framework.TestCase;
 
 public class MarketFillServiceTest extends TestCase {
 
@@ -39,8 +39,10 @@ public class MarketFillServiceTest extends TestCase {
 	public MarketFillServiceTest() {
 		super();
 
-		this.buyOrderRepository = new InMemoryBuyOrderRepository();
+//		this.buyOrderRepository = new InMemoryBuyOrderRepository();
+		this.buyOrderRepository = new GemFireBuyOrderRepository();
 	}
+
 
 	public void testFillMarketOrders() throws Exception {
 		BuyOrder[] buyOrders = this.buyOrderFixture();
@@ -53,18 +55,13 @@ public class MarketFillServiceTest extends TestCase {
 
 		TickerSymbol tickerSymbol = new TickerSymbol(quoteBar.symbol());
 
-		int totalQuantityAvailable =
-				quoteBar
-					.totalQuantity()
-					.toBigInteger()
-					.intValue();
+		int totalQuantityAvailable = quoteBar.totalQuantity().toBigInteger().intValue();
 
-		Collection<BuyOrder> openOrders =
-				this.buyOrderRepository.openOrdersOf(tickerSymbol);
+		Collection<BuyOrder> openOrders = this.buyOrderRepository.openOrdersOf(tickerSymbol);
 
 		MarketFillService marketFillService = new MarketFillService(this.buyOrderRepository);
 
-		marketFillService.fillMarketBuyOrders(openOrders, totalQuantityAvailable);
+		marketFillService.fillBuyOrders(openOrders, totalQuantityAvailable);
 
 		int filledCount = 0;
 
@@ -98,19 +95,13 @@ public class MarketFillServiceTest extends TestCase {
 
 		TickerSymbol tickerSymbol = new TickerSymbol(quoteBar.symbol());
 
-		int totalQuantityAvailable =
-				quoteBar
-					.totalQuantity()
-					.toBigInteger()
-					.intValue();
+		int totalQuantityAvailable = quoteBar.totalQuantity().toBigInteger().intValue();
 
-		Collection<BuyOrder> openOrders =
-				this.buyOrderRepository.openOrdersOf(tickerSymbol);
+		Collection<BuyOrder> openOrders = this.buyOrderRepository.openOrdersOf(tickerSymbol);
 
-		MarketFillService marketFillService =
-				new MarketFillService(this.buyOrderRepository);
+		MarketFillService marketFillService = new MarketFillService(this.buyOrderRepository);
 
-		marketFillService.fillMarketBuyOrders(openOrders, totalQuantityAvailable);
+		marketFillService.fillBuyOrders(openOrders, totalQuantityAvailable);
 
 		int stillOpenCount = 0;
 
@@ -133,59 +124,41 @@ public class MarketFillServiceTest extends TestCase {
 	private BuyOrder[] buyOrderFixture() {
 		BuyOrder[] buyOrders = new BuyOrder[3];
 
-		buyOrders[0] =
-				new BuyOrder(
-					AccountId.unique(),
-					new Quote(new TickerSymbol("GOOG"), new Money("720.43")),
-					5,
-					new Money("9.99"));
+		buyOrders[0] = new BuyOrder(AccountId.unique(), new Quote(new TickerSymbol("GOOG"), new Money("720.43")), 5,
+				new Money("9.99"));
 
-		buyOrders[1] =
-				new BuyOrder(
-					AccountId.unique(),
-					new Quote(new TickerSymbol("GOOG"), new Money("720.43")),
-					7,
-					new Money("9.99"));
+		buyOrders[1] = new BuyOrder(AccountId.unique(), new Quote(new TickerSymbol("GOOG"), new Money("720.43")), 7,
+				new Money("9.99"));
 
-		buyOrders[2] =
-				new BuyOrder(
-					AccountId.unique(),
-					new Quote(new TickerSymbol("MSFT"), new Money("27.50")),
-					10,
-					new Money("9.99"));
+		buyOrders[2] = new BuyOrder(AccountId.unique(), new Quote(new TickerSymbol("MSFT"), new Money("27.50")), 10,
+				new Money("9.99"));
 
 		return buyOrders;
 	}
 
 	private QuoteBar quoteBarFixture() {
 
-		Collection<PriceVolume> priceVolumes =
-				this.priceVolumeValues(new Money("720.40"), new BigDecimal("87231"));
+		Collection<PriceVolume> priceVolumes = this.priceVolumeValues(new Money("720.40"), new BigDecimal("87231"));
 
-		QuoteBar quoteBar =
-				new QuoteBar("Google, Inc.", "GOOG", new Money("720.55"), new Money("720.30"), new Money("720.25"),
-						new Money("720.60"), new Money("720.25"), new BigDecimal("87231"), priceVolumes,
-						new BigDecimal("12003"), 22);
+		QuoteBar quoteBar = new QuoteBar("Google, Inc.", "GOOG", new Money("720.55"), new Money("720.30"),
+				new Money("720.25"), new Money("720.60"), new Money("720.25"), new BigDecimal("87231"), priceVolumes,
+				new BigDecimal("12003"), 22);
 
 		return quoteBar;
 	}
 
 	private QuoteBar quoteBarUnmatchedFixture() {
 
-		Collection<PriceVolume> priceVolumes =
-				this.priceVolumeValues(new Money("35.20"), new BigDecimal("72771"));
+		Collection<PriceVolume> priceVolumes = this.priceVolumeValues(new Money("35.20"), new BigDecimal("72771"));
 
-		QuoteBar quoteBar =
-				new QuoteBar("Oracle, Inc.", "ORCL", new Money("35.20"), new Money("35.25"), new Money("35.95"),
-						new Money("35.15"), new Money("35.19"), new BigDecimal("72771"), priceVolumes,
-						new BigDecimal("15145"), priceVolumes.size());
+		QuoteBar quoteBar = new QuoteBar("Oracle, Inc.", "ORCL", new Money("35.20"), new Money("35.25"),
+				new Money("35.95"), new Money("35.15"), new Money("35.19"), new BigDecimal("72771"), priceVolumes,
+				new BigDecimal("15145"), priceVolumes.size());
 
 		return quoteBar;
 	}
 
-	private Collection<PriceVolume> priceVolumeValues(
-			Money aBasePrice,
-			BigDecimal aBaseVolume) {
+	private Collection<PriceVolume> priceVolumeValues(Money aBasePrice, BigDecimal aBaseVolume) {
 
 		List<PriceVolume> priceVolumes = new ArrayList<PriceVolume>();
 		Money price = aBasePrice;

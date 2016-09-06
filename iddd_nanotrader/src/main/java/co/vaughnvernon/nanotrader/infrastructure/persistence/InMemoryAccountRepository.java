@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import co.vaughnvernon.nanotrader.domain.model.account.Account;
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.nanotrader.domain.model.account.AccountRepository;
+import co.vaughnvernon.tradercommon.order.AccountId;
 
 public class InMemoryAccountRepository implements AccountRepository {
 

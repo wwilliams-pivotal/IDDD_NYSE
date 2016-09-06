@@ -30,6 +30,11 @@ public class TestableDomainEvent implements DomainEvent {
 		this.setId(anId);
 		this.setOccurredOn(new Date());
 	}
+	
+	// constructor for serialization
+	public TestableDomainEvent() {
+		super();
+	}
 
 	@Override
 	public int eventVersion() {

@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package co.vaughnvernon.nanotrader.domain.model.account;
+package co.vaughnvernon.tradercommon.order;
 
 import java.util.UUID;
 
@@ -29,6 +29,13 @@ public final class AccountId {
 
 		this.setId(anId);
 	}
+	
+	/*
+	 * public no-arg contructor for serialization
+	 */
+	public AccountId() {
+		super();
+	}	
 
 	public String id() {
 		return this.id;

@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>co.vaughnvernon.nanotrader</groupId>
+	<artifactId>iddd_nanotrader</artifactId>
+	<packaging>jar</packaging>
+
+	<name>iddd_tradercommon</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<gemfire.version>8.2.1</gemfire.version>
+	</properties>
+
+	<parent>
+		<groupId>co.vaughnvernon</groupId>
+		<artifactId>IDDD_NYSE</artifactId>
+		<version>0.0.1_SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.gemstone.gemfire</groupId>
+			<artifactId>gemfire</artifactId>
+			<version>${gemfire.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>co.vaughnvernon.tradercommon</groupId>
+			<artifactId>iddd_tradercommon</artifactId>
+			<version>0.0.1_SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+
+	</dependencies>
+
+	<repositories>
+
+		<!-- gemfire -->
+		<repository>
+			<id>gemfire-repository</id>
+			<name>Gemfire Repository</name>
+			<url>http://dist.gemstone.com/maven/release</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+</project>

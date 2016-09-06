@@ -40,6 +40,10 @@ public class AlgoOrderFilled implements DomainEvent {
 		this.orderType = anOrderType;
 		this.quote = aQuote;
 	}
+	
+	// constructor for serialization
+	public AlgoOrderFilled() {
+	}
 
 	@Override
 	public int eventVersion() {

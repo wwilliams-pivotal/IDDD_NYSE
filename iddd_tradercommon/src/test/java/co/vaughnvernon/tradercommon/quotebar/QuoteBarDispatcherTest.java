@@ -38,7 +38,7 @@ public class QuoteBarDispatcherTest extends TestCase {
 
 		QuoteFeederRunner.instance().run();
 
-		Thread.sleep(4100L);
+		Thread.sleep(8100L);
 
 		assertTrue(quoteBarCount > 0);
 	}

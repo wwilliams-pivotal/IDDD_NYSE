@@ -12,11 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package co.vaughnvernon.nanotrader.domain.model.order;
+package co.vaughnvernon.tradercommon.order;
 
 import java.util.Date;
 
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.tradercommon.event.DomainEvent;
 import co.vaughnvernon.tradercommon.monetary.Money;
 import co.vaughnvernon.tradercommon.quote.Quote;
@@ -52,6 +51,9 @@ public class BuyOrderPlaced implements DomainEvent {
 		this.setQuote(aQuote);
 	}
 
+	// constructor for serialization
+	public BuyOrderPlaced() {}
+	
 	public AccountId accountId() {
 		return this.accountId;
 	}

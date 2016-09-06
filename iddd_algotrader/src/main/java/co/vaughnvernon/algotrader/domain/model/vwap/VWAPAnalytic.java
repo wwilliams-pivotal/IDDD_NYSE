@@ -136,4 +136,8 @@ public class VWAPAnalytic {
 	private void setVwap(Money aVwap) {
 		this.vwap = aVwap;
 	}
+	
+	public static int tradableBars() {
+		return TRADABLE_QUOTE_BARS;
+	}
 }

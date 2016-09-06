@@ -16,6 +16,7 @@ package co.vaughnvernon.nanotrader.application;
 
 import co.vaughnvernon.nanotrader.application.account.ProfileApplicationService;
 import co.vaughnvernon.nanotrader.application.order.BuyOrderApplicationService;
+import co.vaughnvernon.nanotrader.domain.model.order.AlgoFillService;
 import co.vaughnvernon.nanotrader.domain.model.order.MarketFillService;
 import co.vaughnvernon.nanotrader.infrastructure.persistence.InMemoryBuyOrderRepository;
 import co.vaughnvernon.nanotrader.infrastructure.persistence.InMemoryProfileRepository;
@@ -24,19 +25,31 @@ import co.vaughnvernon.tradercommon.quote.StreamingQuoteApplicationService;
 
 public class ApplicationServiceRegistry {
 
-	private static BuyOrderApplicationService buyOrderApplicationService;
+	private static BuyOrderApplicationService marketBuyOrderApplicationService;
+	private static BuyOrderApplicationService algoBuyOrderApplicationService;
 	private static ProfileApplicationService profileApplicationService;
 	private static StreamingQuoteApplicationService streamingQuoteApplicationService;
 
 	public static synchronized BuyOrderApplicationService buyOrderApplicationService() {
-		if (buyOrderApplicationService == null) {
-			buyOrderApplicationService =
+		if (marketBuyOrderApplicationService == null) {
+			marketBuyOrderApplicationService =
 					new BuyOrderApplicationService(
 							InMemoryBuyOrderRepository.instance(),
 							new MarketFillService(InMemoryBuyOrderRepository.instance()));
 		}
 
-		return buyOrderApplicationService;
+		return marketBuyOrderApplicationService;
+	}
+
+	public static synchronized BuyOrderApplicationService algoBuyOrderApplicationService() {
+		if (algoBuyOrderApplicationService == null) {
+			algoBuyOrderApplicationService =
+					new BuyOrderApplicationService(
+							InMemoryBuyOrderRepository.instance(),
+							new AlgoFillService(InMemoryBuyOrderRepository.instance()));
+		}
+
+		return algoBuyOrderApplicationService;
 	}
 
 	public static synchronized ProfileApplicationService profileApplicationService() {

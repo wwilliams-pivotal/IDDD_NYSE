@@ -16,8 +16,9 @@ package co.vaughnvernon.nanotrader.domain.model.order;
 
 import java.util.Date;
 
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.tradercommon.event.DomainEvent;
+import co.vaughnvernon.tradercommon.order.AccountId;
+import co.vaughnvernon.tradercommon.order.OrderId;
 import co.vaughnvernon.tradercommon.quote.Quote;
 
 public class BuyOrderSharePurchaseRequested implements DomainEvent {
@@ -45,6 +46,11 @@ public class BuyOrderSharePurchaseRequested implements DomainEvent {
 		this.setQuote(aQuote);
 	}
 
+	// constructor for serialization
+	public BuyOrderSharePurchaseRequested() {
+		super();
+	}
+	
 	public AccountId accountId() {
 		return this.accountId;
 	}

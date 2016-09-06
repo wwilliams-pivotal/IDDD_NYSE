@@ -17,7 +17,7 @@ package co.vaughnvernon.algotrader.domain.model.order;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
+import co.vaughnvernon.tradercommon.event.DomainEventGemFirePublisher;
 import co.vaughnvernon.tradercommon.monetary.Money;
 import co.vaughnvernon.tradercommon.quote.Quote;
 
@@ -65,29 +65,30 @@ public class AlgoOrder {
 		return this.quote;
 	}
 
-	public void requestSlice(Money aPrice, BigDecimal aSliceQuantity) {
-		if (this.hasSharesRemaining()) {
-			BigDecimal sharesToAcquire =
-					this.min(this.sharesRemaining(), aSliceQuantity);
+	public BigDecimal requestSlice(Money aPrice, BigDecimal aSliceQuantity) {
+		BigDecimal sharesToAcquire =
+				this.min(this.sharesRemaining(), aSliceQuantity);
 
+		if (this.hasSharesRemaining()) {
 			this.setSharesRemaining(this.sharesRemaining().subtract(sharesToAcquire));
 
-			DomainEventPublisher
+			DomainEventGemFirePublisher
 				.instance()
 				.publish(new AlgoSliceOrderSharesRequested(
 						this.orderId(),
 						this.quote().tickerSymbol(),
 						aPrice,
-						aSliceQuantity));
+						sharesToAcquire));
 
 			if (!this.hasSharesRemaining()) {
 				this.filled();
 			}
 		}
+		return sharesToAcquire;
 	}
 
-	public void requestSlice(Money aPrice, int aSliceQuantity) {
-		this.requestSlice(aPrice, new BigDecimal(aSliceQuantity));
+	public BigDecimal requestSlice(Money aPrice, int aSliceQuantity) {
+		return this.requestSlice(aPrice, new BigDecimal(aSliceQuantity));
 	}
 
 	public boolean hasSharesRemaining() {
@@ -148,7 +149,7 @@ public class AlgoOrder {
 						new BigDecimal(this.quote().quantity()),
 						new Date()));
 
-		DomainEventPublisher
+		DomainEventGemFirePublisher
 			.instance()
 			.publish(new AlgoOrderFilled(
 					this.orderId(),

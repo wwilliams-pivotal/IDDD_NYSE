@@ -22,7 +22,7 @@ import java.util.Map;
 
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrder;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrderRepository;
-import co.vaughnvernon.nanotrader.domain.model.order.OrderId;
+import co.vaughnvernon.tradercommon.order.OrderId;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 
 public class InMemoryBuyOrderRepository implements BuyOrderRepository {

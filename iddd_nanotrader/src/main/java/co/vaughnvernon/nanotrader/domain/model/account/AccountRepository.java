@@ -14,6 +14,8 @@
 
 package co.vaughnvernon.nanotrader.domain.model.account;
 
+import co.vaughnvernon.tradercommon.order.AccountId;
+
 public interface AccountRepository {
 
 	public Account accountOf(AccountId anAccountId);

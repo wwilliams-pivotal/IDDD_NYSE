@@ -31,6 +31,12 @@ public final class TickerSymbol implements Serializable {
 	public TickerSymbol(TickerSymbol aTickerSymbol) {
 		this(aTickerSymbol.symbol());
 	}
+	
+	//serialization constructor
+
+	public TickerSymbol() {
+		super();
+	}
 
 	public String symbol() {
 		return this.symbol;

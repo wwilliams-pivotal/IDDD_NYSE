@@ -12,17 +12,31 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package co.vaughnvernon.nanotrader.domain.model.order;
+package co.vaughnvernon.tradercommon.order;
 
 import java.util.UUID;
 
 public final class OrderId {
 
 	private String id;
+	private String colocationId;
 
 	public static OrderId unique() {
 		return new OrderId(UUID.randomUUID().toString().toUpperCase());
 	}
+
+	public static OrderId unique(String aColocationId) {
+		return new OrderId(UUID.randomUUID().toString().toUpperCase(), aColocationId);
+	}
+	
+	/*
+	 * Empty constructor for serialization only
+	 */
+	public OrderId() {
+		super();
+	}
+
+
 
 	public OrderId(String anId) {
 		super();
@@ -30,8 +44,19 @@ public final class OrderId {
 		this.setId(anId);
 	}
 
+	public OrderId(String anId, String aColocationId) {
+		super();
+
+		this.setId(anId);
+		this.setColocationId(aColocationId);
+	}
+
 	public String id() {
 		return this.id;
+	}
+
+	public String colocationId() {
+		return colocationId;
 	}
 
 	@Override
@@ -41,6 +66,17 @@ public final class OrderId {
 			OrderId typedObject = (OrderId) anObject;
 			equalObjects =
 					this.id().equals(typedObject.id());
+			if (!equalObjects) {
+				return false;
+			}
+			if (this.colocationId() == null && typedObject.colocationId() == null) {
+				return true;
+			}
+			if (this.colocationId() == null || typedObject.colocationId() == null) {
+				return false;
+			}
+			equalObjects =
+					this.colocationId().equals(typedObject.colocationId());
 		}
 		return equalObjects;
 	}
@@ -50,13 +86,16 @@ public final class OrderId {
 		int hashCodeValue =
 			+ (95123 * 89)
 			+ this.id().hashCode();
+		if (this.colocationId() != null) {
+			hashCodeValue += this.colocationId().hashCode();
+		}
 
 		return hashCodeValue;
 	}
 
 	@Override
 	public String toString() {
-		return "OrderId [id=" + id + "]";
+		return "OrderId [id=" + id + ", colocationId=" + colocationId + "]";
 	}
 
 	private void setId(String anId) {
@@ -68,4 +107,9 @@ public final class OrderId {
 		}
 		this.id = anId;
 	}
+	
+	public void setColocationId(String aColocationId) {
+		this.colocationId = aColocationId;
+	}
+
 }

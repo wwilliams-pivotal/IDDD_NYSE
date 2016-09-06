@@ -14,10 +14,12 @@
 
 package co.vaughnvernon.nanotrader.domain.model.order;
 
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.nanotrader.domain.model.account.Holding;
-import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
+import co.vaughnvernon.tradercommon.event.DomainEventGemFirePublisher;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
+import co.vaughnvernon.tradercommon.order.BuyOrderPlaced;
+import co.vaughnvernon.tradercommon.order.OrderId;
 import co.vaughnvernon.tradercommon.quote.Quote;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 
@@ -39,10 +41,10 @@ public class BuyOrder {
 
 		this.setAccountId(anAccountId);
 		this.setExecution(new PurchaseExecution(aQuantityOfSharesOrdered));
-		this.setOrderId(OrderId.unique());
+		this.setOrderId(OrderId.unique(aQuote.tickerSymbol().symbol()));
 		this.setQuote(aQuote);
 
-		DomainEventPublisher.instance().publish(
+		DomainEventGemFirePublisher.instance().publish(
 				new BuyOrderPlaced(
 						this.accountId(),
 						this.orderId(),
@@ -52,6 +54,15 @@ public class BuyOrder {
 						aQuote.price().multipliedBy(aQuantityOfSharesOrdered),
 						anOrderFee));
 	}
+	
+	/*
+	 * public no-arg constructor for serialization
+	 */
+	public BuyOrder() {
+		super();
+	}
+
+
 
 	public AccountId accountId() {
 		return this.accountId;
@@ -124,7 +135,7 @@ public class BuyOrder {
 								aQuantityOfSharesAvailable);
 
 				if (quantityToPurchase > 0) {
-					DomainEventPublisher.instance().publish(
+					DomainEventGemFirePublisher.instance().publish(
 							new BuyOrderSharePurchaseRequested(
 									this.accountId(),
 									this.orderId(),
@@ -136,7 +147,7 @@ public class BuyOrder {
 								.withPurchasedSharesOf(quantityToPurchase));
 
 					if (this.isFilled()) {
-						DomainEventPublisher.instance().publish(
+						DomainEventGemFirePublisher.instance().publish(
 								new BuyOrderFilled(
 										this.accountId(),
 										this.orderId(),

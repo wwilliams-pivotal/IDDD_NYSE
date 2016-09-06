@@ -16,10 +16,11 @@ package co.vaughnvernon.nanotrader.domain.model.account;
 
 import java.util.Date;
 
-import junit.framework.TestCase;
-import co.vaughnvernon.nanotrader.domain.model.order.OrderId;
 import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
+import co.vaughnvernon.tradercommon.order.OrderId;
+import junit.framework.TestCase;
 
 public class PaymentTest extends TestCase {
 

@@ -27,6 +27,13 @@ public abstract class OrderExecution {
 		this(new Date(), aQuantityOfSharesOrdered, aQuantityOfSharesOrdered);
 	}
 
+	/*
+	 * serialization constructor
+	 */
+	public OrderExecution() {
+		super();
+	}
+
 	public Date filledDate() {
 		return this.filledDate;
 	}

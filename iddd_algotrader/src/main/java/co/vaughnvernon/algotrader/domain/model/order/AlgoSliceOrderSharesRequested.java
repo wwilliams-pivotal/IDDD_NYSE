@@ -45,6 +45,10 @@ public class AlgoSliceOrderSharesRequested implements DomainEvent {
 		this.quantity = aQuantity;
 		this.tickerSymbol = aTickerSymbol;
 	}
+	
+	// constructor for serialization
+	public AlgoSliceOrderSharesRequested() {
+	}
 
 	@Override
 	public int eventVersion() {

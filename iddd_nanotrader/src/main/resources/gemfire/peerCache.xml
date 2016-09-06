@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<cache xmlns="http://schema.pivotal.io/gemfire/cache" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://schema.pivotal.io/gemfire/cache http://schema.pivotal.io/gemfire/cache/cache-8.1.xsd"
+	lock-lease="120" lock-timeout="60" search-timeout="300" is-server="false"
+	copy-on-read="false" version="8.1">
+	<pdx persistent="true" />
+	<region name="Prices">
+		<region-attributes refid="PARTITION_REDUNDANT" />
+	</region>
+	<region name="SimplePrices">
+		<region-attributes refid="PARTITION_REDUNDANT">
+			<partition-attributes local-max-memory="0" />
+		</region-attributes>
+	</region>
+</cache>

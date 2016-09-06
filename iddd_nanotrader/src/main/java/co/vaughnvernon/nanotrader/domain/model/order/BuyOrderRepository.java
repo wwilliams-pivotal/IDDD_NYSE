@@ -16,6 +16,7 @@ package co.vaughnvernon.nanotrader.domain.model.order;
 
 import java.util.Collection;
 
+import co.vaughnvernon.tradercommon.order.OrderId;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 
 public interface BuyOrderRepository {

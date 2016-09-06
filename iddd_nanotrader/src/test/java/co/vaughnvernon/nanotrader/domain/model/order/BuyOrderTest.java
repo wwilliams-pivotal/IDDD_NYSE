@@ -15,11 +15,12 @@
 package co.vaughnvernon.nanotrader.domain.model.order;
 
 import junit.framework.TestCase;
-import co.vaughnvernon.nanotrader.domain.model.account.AccountId;
 import co.vaughnvernon.nanotrader.domain.model.account.Holding;
 import co.vaughnvernon.tradercommon.event.DomainEventPublisher;
 import co.vaughnvernon.tradercommon.event.DomainEventSubscriber;
 import co.vaughnvernon.tradercommon.monetary.Money;
+import co.vaughnvernon.tradercommon.order.AccountId;
+import co.vaughnvernon.tradercommon.order.BuyOrderPlaced;
 import co.vaughnvernon.tradercommon.quote.Quote;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 

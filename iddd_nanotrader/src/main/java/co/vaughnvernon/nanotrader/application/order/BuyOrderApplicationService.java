@@ -18,26 +18,26 @@ import java.util.Collection;
 
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrder;
 import co.vaughnvernon.nanotrader.domain.model.order.BuyOrderRepository;
-import co.vaughnvernon.nanotrader.domain.model.order.MarketFillService;
+import co.vaughnvernon.nanotrader.domain.model.order.FillService;
 import co.vaughnvernon.tradercommon.quote.TickerSymbol;
 import co.vaughnvernon.tradercommon.quotebar.QuoteBar;
 
 public class BuyOrderApplicationService {
 
 	private BuyOrderRepository buyOrderRepository;
-	private MarketFillService marketFillService;
+	private FillService fillService;
 
 	public BuyOrderApplicationService(
 			BuyOrderRepository aBuyOrderRepository,
-			MarketFillService aMarketFillService) {
+			FillService aFillService) {
 
 		super();
 
 		this.buyOrderRepository = aBuyOrderRepository;
-		this.marketFillService = aMarketFillService;
+		this.fillService = aFillService;
 	}
 
-	public void fillMarketOrdersUsing(QuoteBar aQuoteBar) {
+	public void fillOrdersUsing(QuoteBar aQuoteBar) {
 
 		TickerSymbol tickerSymbol = new TickerSymbol(aQuoteBar.symbol());
 
@@ -50,14 +50,14 @@ public class BuyOrderApplicationService {
 		Collection<BuyOrder> openOrders =
 				this.buyOrderRepository().openOrdersOf(tickerSymbol);
 
-		this.marketFillService().fillMarketBuyOrders(openOrders, totalQuantityAvailable);
+		this.fillService().fillBuyOrders(openOrders, totalQuantityAvailable);
 	}
 
 	private BuyOrderRepository buyOrderRepository() {
 		return this.buyOrderRepository;
 	}
 
-	private MarketFillService marketFillService() {
-		return this.marketFillService;
+	private FillService fillService() {
+		return this.fillService;
 	}
 }

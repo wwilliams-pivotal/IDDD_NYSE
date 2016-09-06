@@ -37,6 +37,6 @@ public class NanoTraderQuoteBarInterest implements QuoteBarInterest {
 
 		ApplicationServiceRegistry
 			.buyOrderApplicationService()
-			.fillMarketOrdersUsing(aQuoteBar);
+			.fillOrdersUsing(aQuoteBar);
 	}
 }

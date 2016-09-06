@@ -1,0 +1,27 @@
+<!DOCTYPE client-cache PUBLIC 
+"-//GemStone Systems, Inc.//GemFire Declarative Caching 7//EN" 
+"http://www.gemstone.com/dtd/cache8_0.dtd">
+
+<client-cache>
+
+  <pool name="pool" subscription-enabled="true">
+    <locator host="localhost" port="10334"/>
+  </pool>
+
+    <pdx persistent="true">
+        <pdx-serializer>
+            <class-name>com.gemstone.gemfire.pdx.ReflectionBasedAutoSerializer</class-name>
+            <parameter name="classes">
+                <string>.*</string>
+            </parameter>
+        </pdx-serializer>
+    </pdx>
+    
+    <region name="DomainEvents">
+        <region-attributes refid="PROXY" pool-name="pool" />
+    </region>
+    
+    <region name="BuyOrders">
+        <region-attributes refid="PROXY" pool-name="pool" />
+    </region>
+</client-cache>
